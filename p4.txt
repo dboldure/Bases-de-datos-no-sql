@@ -1,0 +1,94 @@
+﻿// Grupo: 10
+// nombre 1: Daniela Nicoleta Boldureanu
+// nombre 2: Adrián Nieto Moya
+
+// Observaciones.
+
+
+// 1 
+
+mongo --port 27001
+config = {
+              "_id": "practReplica",
+ 
+              "members": [ {"_id":0, "host":"127.0.0.1:27001", "priority":2 },
+ 
+                               {"_id":1, "host":"127.0.0.1:27002" },
+ 
+                               {"_id":2, "host":"127.0.0.1:27003","priority":0, "slaveDelay":120, "buildIndexes" :false } ]
+ 
+          }
+rs.initiate(config)
+
+// 2 
+
+var config=rs.conf()
+config.members[2].slaveDelay=10;
+rs.reconfig(config)
+
+// 3 
+
+rs.status()
+
+                {
+                        "_id" : 2,
+                        "name" : "127.0.0.1:27003",
+                        "health" : 0,
+                        "state" : 8,
+                        "stateStr" : "(not reachable/healthy)",
+                        "uptime" : 0,
+                        "optime" : {
+                                "ts" : Timestamp(0, 0),
+                                "t" : NumberLong(-1)
+                        },
+                        "optimeDurable" : {
+                                "ts" : Timestamp(0, 0),
+                                "t" : NumberLong(-1)
+                        },
+                        "optimeDate" : ISODate("1970-01-01T00:00:00Z"),
+                        "optimeDurableDate" : ISODate("1970-01-01T00:00:00Z"),
+                        "lastHeartbeat" : ISODate("2020-11-25T13:30:32.428Z"),
+                        "lastHeartbeatRecv" : ISODate("2020-11-25T13:29:54.804Z"),
+                        "pingMs" : NumberLong(0),
+                        "lastHeartbeatMessage" : "Error connecting to 127.0.0.1:27003 :: caused by :: No se puede establecer una conexi�n ya que el equipo de destino deneg� expresamente dicha conexi�n.",
+                        "syncSourceHost" : "",
+                        "syncSourceId" : -1,
+                        "infoMessage" : "",
+                        "configVersion" : 2,
+                        "configTerm" : 1
+                }
+
+
+
+// 4 
+
+db.pru.insert({a:1})
+db.pru.update({a:1},{writeConcern:{w:3,wtimeout:20}})
+
+// 5 
+
+Se puede ver la colección tururu con 5 elementos, dado que cuando el primario modifica la colección inmediatamente informa a los secundarios para que ejecuten la misma instrucción.
+
+
+// 6 
+
+Se tiene que ejecutar rs.secondaryOk() antes de hacer el find para poder ver la colección.
+
+// 7 
+
+No se puede insertar en T3 ya que este es un secundario.
+
+// 8 
+
+Cuando T1 vuelve a conectarse este se conecta como secundario ya que al desconectarse, el T2 se convirtió en primario, pero al pulsar enter un par de veces T1 volvio a ser el primario dado que T1 tiene una prioridad de 2.
+
+// 9 
+
+db.tururu.find().readPref("secondaryPreferred")
+
+// 10 
+
+rs.stepDown()                    //Retiramos el T1 como primario
+Pulsamos Ctrl+D                  //Desconectamos de T1
+mongo --port 27002               //Conectamos con el nuevo primario
+rs.remove("127.0.0.1:27001")     //Eliminamos definitivamente T1

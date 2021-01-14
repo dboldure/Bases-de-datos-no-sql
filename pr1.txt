@@ -1,0 +1,46 @@
+﻿Práctica 1 -  NoSQL - Solución
+
+Nombre 1: Adrián Nieto Moya
+Nombre 2: Daniela Nicoleta Boldureanu
+
+Observaciones:
+Grupo 10
+
+Respuestas
+
+1# 
+
+db.derbi.find({"in_reply_to_screen_name" : "Jezivi1"}).pretty()
+
+2# 
+ 
+db.derbi.find({"user.verified" :true}).count()
+
+3#
+
+db.derbi.find({"user.followers_count":{$gt:800000}},{"_id":0, "user.followers_count":1,"user.screen_name":1}).pretty()
+
+4#
+
+db.derbi.find({},{"_id":0,"user.location":1 ,"user.screen_name":1}).sort({"user.location":-1,"user.screen_name":1}).pretty()
+
+5#
+
+db.derbi.find({"user.verified":true},{"_id":0,"user":1}).sort({"user.followers_count":1}).limit(1).pretty()
+
+6#
+
+db.pru.find({},{"_id":0,"a":1,"b":1}).sort({"b":1,"a":-1}).pretty()
+
+7#
+
+La respuesta es falsa , dado que primero se ordenan todos los documentos y despues se muestran solo los 5 primeros.
+
+8#
+
+db.pru.find({},{"_id":0,"a":{$slice:-2}})
+
+
+
+
+

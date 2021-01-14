@@ -1,0 +1,61 @@
+// nombre 1:Daniela Nicoleta Boldureanu
+// nombre 2:Adrián Nieto Moya
+
+// Observaciones.
+
+// Instrucciones
+// Importar el fichero json con
+//  mongoimport --db=food --collection=restaurants --drop --file=restaurants.json
+// completar las queries que se piden. No añadir el símbolo del prompt ni la respuesta, solo la query
+
+// 1 Número de restaurantes que cierran  los lunes (clave "Monday" de "operating_hours" a "Closed"
+
+db.restaurants.find({"operating_hours.Monday":"Closed"}).count()
+
+// 2 Número de restaurantes que tienen algún rating (subclave dentro de reviews) a 2
+
+db.restaurants.find({"reviews.rating":2.0}).count()
+
+// 3 crear un índice de tipo texto sobre el campo comments de la clave review y un índice de tipo 2dsphere sobre la clave "pos"
+
+db.restaurants.createIndex({"reviews.comments":"text"})
+db.restaurants.createIndex({"pos":"2dsphere"})
+
+// 4 Hoy me apetece comer mexicano. Buscar restaurantes a una distancia máxima de 500 metros de las coordenadas [-73.950652,40.743797] que tengan "cuisine_type" con  valor "Mexican".
+// Mostrar solo el nombre.
+
+db.restaurants.find({"cuisine_type":"Mexican", "pos":{$near:{$geometry:{"type":"Point","coordinates":[-73.950652,40.743797]},$maxDistance:500}}},{"_id":0,"name":1})
+
+// 5 Mostrar el nombre (solo el nombre, clave name) de los restaurantes que tengan algún review que mencione la palabra Japanese
+db.restaurants.
+
+db.restaurants.find({$text:{$search:"Japanese"}},{"_id":0,"name":1})
+
+// 6 Mostrar el nombre (name) de los restaurantes tal que tienen reviews que incluyan la palabra delicious pero no la palabra love
+//(ver https://docs.mongodb.com/manual/reference/operator/query/text/)
+
+db.restaurants.find({$text:{$search:"delicious -love"}},{"_id":0,"name":1})
+
+// 7 Mostrar nombres (name) de restaurantes que incluyan entre sus reviews la cadena
+//"the best tonkotsu"
+//(ver https://docs.mongodb.com/manual/reference/operator/query/text/)
+
+db.restaurants.find({$text:{$search:"\"the best tonkotsu\""}},{"_id":0,"name":1})
+
+// 8 Número de reviews que ha hecho el usuario con name 'Steve'
+
+db.restaurants.find({"reviews.name":"Steve"}).count()
+
+
+// 9 Restaurantes que incluyan la palabra delicious o la palabra love. Hace que se muestre el name y el score 
+// (ver https://docs.mongodb.com/manual/reference/operator/aggregation/meta/)
+
+db.restaurants.find({$text:{$search:"delicious love"}},{"_id":0,"name":1,"score":{$meta:"textScore"}})
+
+
+// 10 difícil: mostrar los campos _id, name y todos los ratings de aquellos restaurantes que no tengan en ninguna de sus reviews un rating
+//por debajo de 4. No se puede asumir nada sobre los ratings, solo hay que asegurarse de que ese restaurante no tiene ninguno 
+// por debajo de 4. Un posible formato de salida (no es obligatorio que salga así, solo una posibilidad):
+// { "_id" : 2, "name" : "Emily", "reviews" : [ { "rating" : 4 }, { "rating" : 4 }, { "rating" : 5 } ] }
+
+db.restaurants.find({"reviews":{$not:{$elemMatch:{"rating":{$lt:4}}}}},{"_id":1,"name":1,"reviews.rating":1})
